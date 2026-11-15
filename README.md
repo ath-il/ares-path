@@ -14,13 +14,29 @@ ARES PATH combines publicly available NASA Mars science imagery into an interact
 
 ## Screenshots
 
-| | |
-|---|---|
-| ![MOLA hillshade basemap](docs/screenshots/01-mola-hillshade.png) | ![Layer selector with unavailable dataset](docs/screenshots/02-layer-unavailable.png) |
-| ![Route planner with custom endpoints](docs/screenshots/03-route-planner.png) | ![Mobile drawer view](docs/screenshots/04-mobile-drawers.png) |
-| ![Mission brief / PDF export](docs/screenshots/05-mission-brief.png) | ![Zoom controls and HUD](docs/screenshots/06-zoom-controls.png) |
+Captures of the running prototype (live at https://ares-path.vercel.app). Drop the PNGs into `docs/screenshots/` with the exact filenames below.
 
-> Drop your PNG captures into `docs/screenshots/` (create the folder) using the filenames above. Until then the images will show as broken links on GitHub, which is fine.
+| # | File | What it shows |
+|---|------|---------------|
+| 1 | `01-landing.png` | Landing page hero with "INITIATE MISSION" and "EXPLORE TECHNOLOGIES" entry points |
+| 2 | `02-mola-hillshade.png` | Main map with MOLA color hillshade active, HUD, tile counter, and attribution visible |
+| 3 | `03-layer-unavailable.png` | Layer panel scrolled to an UNAVAILABLE dataset record (MOLA roughness / THEMIS / TES) with its reason text |
+| 4 | `04-route-planner.png` | Route planner with custom picked endpoints, calculated great-circle route, distance, duration, and INSUFFICIENT assessment |
+| 5 | `05-science-targets.png` | Science targets panel showing a target's summary, why it matters, limitations, and source |
+| 6 | `06-zoom-controls.png` | Map zoomed in with the +/−/reset zoom controls and measurement badge visible |
+| 7 | `07-mission-brief-view.png` | Mission brief generated on-screen (mission ID, coordinates, distance, duration, data limitations) |
+| 8 | `08-mission-brief-pdf.png` | Downloaded PDF mission brief (A4 document with the same content) |
+| 9 | `09-mobile-drawers.png` | Compact view (~390 px) with the left drawer open over the map and backdrop visible |
+
+![Landing page](docs/screenshots/01-landing.png)
+![MOLA hillshade map](docs/screenshots/02-mola-hillshade.png)
+![Unavailable layer record](docs/screenshots/03-layer-unavailable.png)
+![Route planner](docs/screenshots/04-route-planner.png)
+![Science targets](docs/screenshots/05-science-targets.png)
+![Zoom controls](docs/screenshots/06-zoom-controls.png)
+![Mission brief view](docs/screenshots/07-mission-brief-view.png)
+![Mission brief PDF](docs/screenshots/08-mission-brief-pdf.png)
+![Mobile drawers](docs/screenshots/09-mobile-drawers.png)
 
 ---
 
