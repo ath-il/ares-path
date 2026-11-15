@@ -12,6 +12,18 @@ ARES PATH combines publicly available NASA Mars science imagery into an interact
 
 ---
 
+## Screenshots
+
+| | |
+|---|---|
+| ![MOLA hillshade basemap](docs/screenshots/01-mola-hillshade.png) | ![Layer selector with unavailable dataset](docs/screenshots/02-layer-unavailable.png) |
+| ![Route planner with custom endpoints](docs/screenshots/03-route-planner.png) | ![Mobile drawer view](docs/screenshots/04-mobile-drawers.png) |
+| ![Mission brief / PDF export](docs/screenshots/05-mission-brief.png) | ![Zoom controls and HUD](docs/screenshots/06-zoom-controls.png) |
+
+> Drop your PNG captures into `docs/screenshots/` (create the folder) using the filenames above. Until then the images will show as broken links on GitHub, which is fine.
+
+---
+
 ## Quick start
 
 ```bash
