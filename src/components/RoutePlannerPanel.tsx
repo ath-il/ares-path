@@ -1,9 +1,9 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SCIENTIFIC_TARGETS } from '../data/scientificTargets';
 import { DEFAULT_ROUTE_POINTS } from '../data/routeDefaults';
 import { useMission } from '../context/MissionContext';
 import { formatCoordinate, formatDistanceKm, formatDurationHuman } from '../utils/format';
-import { haversineDistanceM } from '../utils/geo';
+import { estimateElevationFromDem, haversineDistanceM } from '../utils/geo';
 import { computeRouteAssessment } from '../services/routing/routeService';
 import type { LatLng, RouteSlot } from '../types/mars';
 
@@ -43,6 +43,31 @@ export default function RoutePlannerPanel() {
     () => (plannedRoute && plannedRoute.points.length >= 2 ? computeRouteAssessment(plannedRoute.points) : null),
     [plannedRoute],
   );
+
+  const [elevStart, setElevStart] = useState<{ m: number; unc: number } | null>(null);
+  const [elevEnd, setElevEnd] = useState<{ m: number; unc: number } | null>(null);
+  const [elevLoading, setElevLoading] = useState(false);
+
+  useEffect(() => {
+    if (!plannedRoute || plannedRoute.points.length < 2) {
+      setElevStart(null);
+      setElevEnd(null);
+      return;
+    }
+    let cancelled = false;
+    setElevLoading(true);
+    (async () => {
+      const [s, e] = await Promise.all([
+        estimateElevationFromDem(plannedRoute.points[0].lat, plannedRoute.points[0].lng),
+        estimateElevationFromDem(plannedRoute.points[1].lat, plannedRoute.points[1].lng),
+      ]);
+      if (cancelled) return;
+      setElevStart(s ? { m: s.elevationM, unc: s.uncertaintyM } : null);
+      setElevEnd(e ? { m: e.elevationM, unc: e.uncertaintyM } : null);
+      setElevLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [plannedRoute]);
 
   // Publish the assessment to mission state after render (never during render).
   useEffect(() => {
@@ -247,6 +272,35 @@ export default function RoutePlannerPanel() {
                   </div>
                 </div>
               ) : null}
+              {(elevStart || elevEnd || elevLoading) ? (
+                <div className="mt-3 rounded border border-ap-border bg-ap-panel/60 p-2.5">
+                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">ELEVATION ESTIMATE (APPROX.)</div>
+                  <div className="mt-1.5 grid grid-cols-2 gap-2">
+                    <div>
+                      <div className="font-mono text-[8px] text-ap-text-faint">START</div>
+                      <div className="mt-0.5 ap-font-display text-xs text-ap-ice">
+                        {elevLoading ? '…' : elevStart ? `${(elevStart.m / 1000).toFixed(1)} km` : 'n/a'}
+                      </div>
+                      {elevStart ? (
+                        <div className="font-mono text-[7px] text-ap-text-faint">±{elevStart.unc / 1000} km</div>
+                      ) : null}
+                    </div>
+                    <div>
+                      <div className="font-mono text-[8px] text-ap-text-faint">DESTINATION</div>
+                      <div className="mt-0.5 ap-font-display text-xs text-ap-ice">
+                        {elevLoading ? '…' : elevEnd ? `${(elevEnd.m / 1000).toFixed(1)} km` : 'n/a'}
+                      </div>
+                      {elevEnd ? (
+                        <div className="font-mono text-[7px] text-ap-text-faint">±{elevEnd.unc / 1000} km</div>
+                      ) : null}
+                    </div>
+                  </div>
+                  <div className="mt-1.5 font-mono text-[7px] leading-relaxed text-ap-text-faint">
+                    Sampled from the MOLA color hillshade tile colour at each endpoint. Colour-to-elevation mapping uses the standard MOLA ramp (blue = low, red/white = high) and is approximate (±2 km). Not a measurement.
+                  </div>
+                </div>
+              ) : null}
+
               {assessment ? (
                 <div className="mt-3">
                   <div className="font-mono text-[9px] tracking-[0.25em] text-ap-text-dim">ASSESSMENT</div>
