@@ -14,7 +14,7 @@ ARES PATH combines publicly available NASA Mars science imagery into an interact
 
 ## Screenshots
 
-Captures of the running prototype (live at https://ares-path.vercel.app). Drop the PNGs into `docs/screenshots/` with the exact filenames below.
+Captures of the running prototype (live at https://ares-path.vercel.app).
 
 | # | File | What it shows |
 |---|------|---------------|
