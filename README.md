@@ -8,7 +8,7 @@ ARES PATH combines publicly available NASA Mars science imagery into an interact
 
 > **Research prototype, not a navigation system.** ARES PATH is an educational visualisation tool. It is not flight-qualified, not terrain-aware, and must never be used for real surface operations.
 
-**Live demo:** https://ares-path-8deg-3ltbzfnae-ar-creators.vercel.app
+**Live demo:** https://ares-path.vercel.app
 
 ---
 
