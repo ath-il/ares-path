@@ -1,4 +1,4 @@
-import { ASSUMED_WALKING_SPEED_MPS, routeDistanceM } from '../../utils/geo';
+import { ASSUMED_WALKING_SPEED_MPS, initialBearingDeg, midpointLatLng, routeDistanceM } from '../../utils/geo';
 import type { LatLng } from '../../types/mars';
 import type { RouteAssessment, RouteAssessmentLevel, RouteFactor } from '../../types/mars';
 
@@ -11,6 +11,8 @@ function normalize(value: number, min: number, max: number): number {
 export function computeRouteAssessment(points: LatLng[]): RouteAssessment {
   const distanceM = routeDistanceM(points);
   const durationS = distanceM > 0 ? distanceM / ASSUMED_WALKING_SPEED_MPS : 0;
+  const bearingDeg = points.length >= 2 ? initialBearingDeg(points[0], points[points.length - 1]) : 0;
+  const midpoint = points.length >= 2 ? midpointLatLng(points[0], points[points.length - 1]) : points[0];
 
   const factors: RouteFactor[] = [
     {
@@ -82,7 +84,7 @@ export function computeRouteAssessment(points: LatLng[]): RouteAssessment {
   if (!elevFactor?.available || !slopeFactor?.available || !roughFactor?.available) {
     level = 'insufficient';
     explanation =
-      'Terrain-specific factors require elevation, slope and roughness data that are not yet available for this route. Only the traverse distance is quantified; the assessment is therefore marked insufficient data.';
+      'Distance, bearing and midpoint are computed from the endpoints. Terrain-specific factors (elevation change, slope, surface roughness) require data that are not yet available as sampled values for this route, so the composite assessment is marked insufficient data.';
   } else {
     level = relativeScore < 0.33 ? 'lower' : relativeScore < 0.66 ? 'moderate' : 'higher';
     explanation =
@@ -96,6 +98,8 @@ export function computeRouteAssessment(points: LatLng[]): RouteAssessment {
   return {
     distanceM,
     durationS,
+    bearingDeg,
+    midpoint,
     elevationChangeM,
     maxSlopePercent,
     factors,

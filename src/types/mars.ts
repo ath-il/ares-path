@@ -113,6 +113,8 @@ export interface RouteFactor {
 export interface RouteAssessment {
   distanceM: number;
   durationS: number;
+  bearingDeg: number;
+  midpoint: LatLng;
   elevationChangeM: number | null;
   maxSlopePercent: number | null;
   factors: RouteFactor[];

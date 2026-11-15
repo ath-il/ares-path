@@ -215,6 +215,39 @@ export default function RoutePlannerPanel() {
                 </div>
               </div>
               {assessment ? (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded border border-ap-border bg-ap-panel/60 p-2">
+                    <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">INITIAL BEARING</div>
+                    <div className="mt-1 ap-font-display text-sm text-ap-text">
+                      {assessment.bearingDeg.toFixed(1)}°
+                    </div>
+                  </div>
+                  <div className="rounded border border-ap-border bg-ap-panel/60 p-2">
+                    <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">MIDPOINT</div>
+                    <div className="mt-1 font-mono text-[9px] text-ap-ice">
+                      {formatCoordinate(assessment.midpoint.lat, assessment.midpoint.lng)}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              {assessment ? (
+                <div className="mt-3">
+                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">TRAVERSE TIMES</div>
+                  <div className="mt-1.5 space-y-1">
+                    {[
+                      { label: 'Suited walk (0.2 m/s)', seconds: plannedRoute.distanceM / 0.2 },
+                      { label: 'Rover (1.0 m/s)', seconds: plannedRoute.distanceM / 1.0 },
+                      { label: 'Aerial drone (5.0 m/s)', seconds: plannedRoute.distanceM / 5.0 },
+                    ].map((t) => (
+                      <div key={t.label} className="flex items-baseline justify-between gap-2">
+                        <span className="font-mono text-[8px] text-ap-text-faint">{t.label}</span>
+                        <span className="font-mono text-[9px] text-ap-text-dim">{formatDurationHuman(t.seconds)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+              {assessment ? (
                 <div className="mt-3">
                   <div className="font-mono text-[9px] tracking-[0.25em] text-ap-text-dim">ASSESSMENT</div>
                   <div className="mt-1 ap-font-display text-sm text-ap-text">{assessment.level.toUpperCase()}</div>

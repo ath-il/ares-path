@@ -33,6 +33,43 @@ export function durationSecondsFromDistance(distanceM: number, speedMps: number)
   return distanceM / speedMps;
 }
 
+/**
+ * Initial bearing (azimuth) in degrees clockwise from north, from point a to point b.
+ * Uses the standard great-circle initial bearing formula on the sphere.
+ */
+export function initialBearingDeg(a: LatLng, b: LatLng): number {
+  const rad = Math.PI / 180;
+  const lat1 = a.lat * rad;
+  const lat2 = b.lat * rad;
+  const dLng = (b.lng - a.lng) * rad;
+  const y = Math.sin(dLng) * Math.cos(lat2);
+  const x = Math.cos(lat1) * Math.sin(lat2) - Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLng);
+  const brng = Math.atan2(y, x) / rad;
+  return (brng + 360) % 360;
+}
+
+/**
+ * Great-circle midpoint between two points.
+ */
+export function midpointLatLng(a: LatLng, b: LatLng): LatLng {
+  const rad = Math.PI / 180;
+  const lat1 = a.lat * rad;
+  const lat2 = b.lat * rad;
+  const dLng = (b.lng - a.lng) * rad;
+  const bx = Math.cos(lat2) * Math.cos(dLng);
+  const by = Math.cos(lat2) * Math.sin(dLng);
+  const lat3 = Math.atan2(Math.sin(lat1) + Math.sin(lat2), Math.sqrt((Math.cos(lat1) + bx) ** 2 + by ** 2));
+  const lng3 = (a.lng * rad) + Math.atan2(by, Math.cos(lat1) + bx);
+  return { lat: lat3 / rad, lng: ((lng3 / rad) + 540) % 360 - 180 };
+}
+
+/** Named traverse speeds for duration estimates. */
+export const TRAVERSE_SPEEDS = [
+  { id: 'walk', label: 'Suited walk', mps: 0.2 },
+  { id: 'rover', label: 'Rover', mps: 1.0 },
+  { id: 'drone', label: 'Aerial drone', mps: 5.0 },
+] as const;
+
 export interface ElevationSample {
   lat: number;
   lng: number;
