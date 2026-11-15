@@ -165,6 +165,11 @@ function AboutContent() {
         must not be used for safety-critical surface operations.
       </p>
 
+      <p className="mt-3 text-xs leading-relaxed text-ap-text-faint">
+        Developed with AI assistance (OpenCode / Beam) for code and documentation. All scientific data is from verified
+        NASA sources; no NASA branding or mission identifiers were AI-generated.
+      </p>
+
       <div className="mt-8">
         <div className="ap-font-display text-sm tracking-[0.25em] text-ap-text">UNDERSTAND YOUR PLANET</div>
         <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">

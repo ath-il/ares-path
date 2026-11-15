@@ -208,6 +208,11 @@ src/
 
 ---
 
-## Credits
+## AI / Super Intelligence usage
+
+This project was developed with the assistance of an AI coding assistant (OpenCode / Beam) for code generation, debugging, refactoring, and documentation. All scientific data, coordinates, distances, dataset records, and NASA resource references are from verified public sources — no AI-generated scientific content was used. No NASA branding, logos, or mission identifiers were created or modified by AI tools.
+
+---
+
 
 Imagery and data: **NASA PDS**, **NASA/JPL Mars Trek (MOLA)**, **USGS Astrogeology**, **ESA / DLR**, **NASA / JPL / University of Arizona (HiRISE)**, **NASA / JPL / MSSS / Caltech Murray Lab (CTX)** and **Esri** (OnMars mosaics). Mars facts: **NASA Mars Fact Sheet**. Built by **GAGANTRIX** for the NASA Space Apps Challenge 2026.
