@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type {
   AppView,
   LatLng,
@@ -70,8 +70,35 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const [lastRoutePoints, setLastRoutePoints] = useState<LatLng[]>([]);
   const [reportOpen, setReportOpen] = useState(false);
   const [regionId, setRegionId] = useState('jezero');
-  const [routePoints, setRoutePoints] = useState<Record<RouteSlot, LatLng>>(DEFAULT_ROUTE_POINTS);
+  const [routePoints, setRoutePoints] = useState<Record<RouteSlot, LatLng>>(() => {
+    // Shareable traverses: ?start=lat,lng&end=lat,lng overrides the presets.
+    const readPoint = (key: string): LatLng | null => {
+      const raw = new URLSearchParams(window.location.search).get(key);
+      if (!raw) return null;
+      const [latStr, lngStr] = raw.split(',');
+      const lat = Number(latStr);
+      const lng = Number(lngStr);
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+      if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+      return { lat, lng };
+    };
+    const start = readPoint('start');
+    const end = readPoint('end');
+    return {
+      start: start ?? DEFAULT_ROUTE_POINTS.start,
+      end: end ?? DEFAULT_ROUTE_POINTS.end,
+    };
+  });
   const [pickSlot, setPickSlot] = useState<RouteSlot | null>(null);
+
+  // Keep the URL in sync so the current traverse is shareable.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    params.set('start', `${routePoints.start.lat},${routePoints.start.lng}`);
+    params.set('end', `${routePoints.end.lat},${routePoints.end.lng}`);
+    const next = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState(null, '', next);
+  }, [routePoints]);
 
   const setRoutePoint = useCallback((slot: RouteSlot, point: LatLng) => {
     setRoutePoints((prev) => ({ ...prev, [slot]: { lat: point.lat, lng: point.lng } }));

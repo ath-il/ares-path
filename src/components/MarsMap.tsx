@@ -23,13 +23,14 @@ export default function MarsMap() {
   const mapRef = useRef<L.Map | null>(null);
   const tileLayerRef = useRef<L.TileLayer | null>(null);
   const routeLayerRef = useRef<L.Polyline | null>(null);
+  const lastAnimatedRouteIdRef = useRef<string | null>(null);
   const startMarkerRef = useRef<L.CircleMarker | null>(null);
   const endMarkerRef = useRef<L.CircleMarker | null>(null);
   const selectedMarkerRef = useRef<L.CircleMarker | null>(null);
   const routeStartMarkerRef = useRef<L.CircleMarker | null>(null);
   const routeEndMarkerRef = useRef<L.CircleMarker | null>(null);
   const pickSlotRef = useRef<RouteSlot | null>(null);
-  const routeRef = useRef<{ points: LatLng[] } | null>(null);
+  const routeRef = useRef<{ points: LatLng[]; id?: string } | null>(null);
   const selectedRef = useRef<{ lat: number; lng: number; name: string; kind: string; id?: string } | null>(null);
   const [mapView, setMapView] = useState({ lat: 18.44, lng: 77.45 });
   const [mapZoom, setMapZoom] = useState(3);
@@ -302,8 +303,17 @@ export default function MarsMap() {
       const current = routeRef.current;
       clearMarkers();
       if (current && current.points.length >= 2) {
-        const latlngs: L.LatLngExpression[] = current.points.map((p) => L.latLng(p.lat, p.lng));
-        const polyline = L.polyline(latlngs, {
+        const start = current.points[0];
+        const end = current.points[current.points.length - 1];
+        // The route is a single great-circle segment, so interpolate intermediate
+        // points along it to give the polyline a visible "drawing" animation.
+        const STEPS = 24;
+        const full: L.LatLng[] = [];
+        for (let k = 0; k <= STEPS; k++) {
+          const t = k / STEPS;
+          full.push(L.latLng(start.lat + (end.lat - start.lat) * t, start.lng + (end.lng - start.lng) * t));
+        }
+        const polyline = L.polyline([full[0]], {
           color: '#e87542',
           weight: 4,
           opacity: 0.95,
@@ -312,6 +322,26 @@ export default function MarsMap() {
         });
         polyline.addTo(map);
         routeLayerRef.current = polyline;
+
+        const animate = (current.id ?? null) !== lastAnimatedRouteIdRef.current;
+        lastAnimatedRouteIdRef.current = current.id ?? null;
+
+        if (animate) {
+          let i = 1;
+          const reveal = () => {
+            if (routeLayerRef.current !== polyline) return; // superseded by a newer route
+            if (i > STEPS) {
+              polyline.setLatLngs([L.latLng(start.lat, start.lng), L.latLng(end.lat, end.lng)]);
+              return;
+            }
+            polyline.setLatLngs(full.slice(0, i + 1));
+            i += 1;
+            window.setTimeout(reveal, 30);
+          };
+          window.setTimeout(reveal, 30);
+        } else {
+          polyline.setLatLngs([L.latLng(start.lat, start.lng), L.latLng(end.lat, end.lng)]);
+        }
       }
     };
 
