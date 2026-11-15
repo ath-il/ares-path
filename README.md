@@ -18,15 +18,9 @@ Captures of the running prototype (live at https://ares-path.vercel.app).
 
 | # | File | What it shows |
 |---|------|---------------|
-| 1 | `01-landing.png` | Landing page hero with "INITIATE MISSION" and "EXPLORE TECHNOLOGIES" entry points |
-| 2 | `02-mola-hillshade.png` | Main map with MOLA color hillshade active, HUD, tile counter, and attribution visible |
-| 3 | `03-layer-unavailable.png` | Layer panel scrolled to an UNAVAILABLE dataset record (MOLA roughness / THEMIS / TES) with its reason text |
-| 4 | `04-route-planner.png` | Route planner with custom picked endpoints, calculated great-circle route, distance, duration, and INSUFFICIENT assessment |
-| 5 | `05-science-targets.png` | Science targets panel showing a target's summary, why it matters, limitations, and source |
-| 6 | `06-zoom-controls.png` | Map zoomed in with the +/−/reset zoom controls and measurement badge visible |
-| 7 | `07-mission-brief-view.png` | Mission brief generated on-screen (mission ID, coordinates, distance, duration, data limitations) |
-| 8 | `08-mission-brief-pdf.png` | Downloaded PDF mission brief (A4 document with the same content) |
-| 9 | `09-mobile-drawers.png` | Compact view (~390 px) with the left drawer open over the map and backdrop visible |
+| 1 | `02-mola-hillshade.png` | Main map with MOLA color hillshade active, HUD, tile counter, and attribution visible |
+| 2 | `04-route-planner.png` | Route planner with custom picked endpoints, calculated great-circle route, distance, duration, and INSUFFICIENT assessment |
+| 3 | `07-mission-brief-view.png` | Mission brief generated on-screen (mission ID, coordinates, distance, duration, data limitations) |
 
 ![MOLA hillshade map — main map view with HUD and tile counter](docs/screenshots/02-mola-hillshade.png)
 
