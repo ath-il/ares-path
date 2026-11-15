@@ -63,7 +63,7 @@ No API keys are required. Every tile service below is public and CORS-enabled
 | Failure handling | If no tile can be fetched, an explicit "basemap unavailable" panel replaces the map — never invented terrain |
 | Explore regions | Jezero Crater, Gale Crater / Aeolis Mons, Valles Marineris — each frames its real bounding box |
 | Science targets | Curated points of interest with summary, why it matters, limitations and source |
-| Route planner | Pick both traverse endpoints directly on the map (or reset to the Jezero/Aeolis presets), then compute great-circle distance, duration and a transparent assessment |
+| Route planner | Pick both traverse endpoints directly on the map (or reset to the Jezero/Aeolis presets), then compute great-circle distance, initial bearing, midpoint, multi-speed durations (suited walk, rover, drone), estimated metabolic energy, angular separation, great-circle waypoints, and a transparent assessment |
 | Mission brief | Generated report with a real PDF download and a printable document view |
 | Education | "Understand your planet" Mars facts with sources |
 | Telemetry | Coordinate readout in decimal degrees and DMS, active dataset, system state |
@@ -156,6 +156,7 @@ The project follows one rule: **never invent a number**. If a quantity has not b
 - Coordinates are real: Jezero Crater at **18.44 °N, 77.45 °E**; Gale Crater / Aeolis Mons region at **4.50 °S, 137.50 °E**; Valles Marineris region centred at **16.0 °S, 53.5 °W**.
 - Distances use the haversine great-circle formula on the Mars mean radius.
 - Duration is `distance ÷ assumed EVA walking speed of 0.2 m/s`, and the assumption is stated wherever the duration appears.
+- Estimated metabolic energy uses an assumed suited-astronaut metabolic rate of 300 W and a 120 kg suited mass; it is a flat-traverse lower bound stated as an assumption, not a measurement.
 - Mars facts (gravity 3.71 m/s², ~95 % CO₂ atmosphere, mean −63 °C, Olympus Mons ~21.9 km, etc.) are attributed to the NASA Mars Fact Sheet.
 
 **Derived, and labelled as such**
