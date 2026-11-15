@@ -65,7 +65,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const [layerStatus, setLayerStatusMap] = useState<LayerLoadStatusMap>(createInitialLayerStatus);
   const [selected, setSelected] = useState<MissionContextValue['selected']>(null);
   const [route, setRoute] = useState<PlannedRoute | null>(null);
-  const [savedRoutes, setSavedRoutes] = useState<PlannedRoute[]>([]);
+  const [savedRoutes, setSavedRoutes] = useState<PlannedRoute[]>(() => loadSavedRoutes());
   const [assessment, setAssessment] = useState<RouteAssessment | null>(null);
   const [lastRoutePoints, setLastRoutePoints] = useState<LatLng[]>([]);
   const [reportOpen, setReportOpen] = useState(false);

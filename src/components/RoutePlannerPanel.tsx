@@ -26,12 +26,15 @@ export default function RoutePlannerPanel() {
     setRoute,
     runAssessment,
     saveRoute,
+    deleteRoute,
     setReportOpen,
+    setRoutePoint,
     routeStart,
     routeEnd,
     pickSlot,
     setPickSlot,
     resetRoutePoint,
+    savedRoutes,
   } = useMission();
 
   const plannedRoute = route;
@@ -149,6 +152,47 @@ export default function RoutePlannerPanel() {
           >
             CALCULATE ROUTE
           </button>
+
+          {savedRoutes.length > 0 ? (
+            <div className="rounded border border-ap-border bg-ap-bg/70 p-3" data-testid="saved-routes">
+              <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">SAVED ROUTES</div>
+              <div className="mt-2 space-y-1.5">
+                {savedRoutes.map((r) => (
+                  <div
+                    key={r.id}
+                    className="flex items-center justify-between gap-2 rounded border border-ap-border bg-ap-bg/60 px-2 py-1.5"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (r.points.length >= 2) {
+                          setRoutePoint('start', r.points[0]);
+                          setRoutePoint('end', r.points[1]);
+                          setRoute(r);
+                        }
+                      }}
+                      className="min-w-0 flex-1 text-left"
+                      data-testid={`load-route-${r.id}`}
+                    >
+                      <div className="truncate ap-font-display text-[10px] text-ap-text">{r.name}</div>
+                      <div className="font-mono text-[8px] text-ap-text-faint">
+                        {formatDistanceKm(r.distanceM)} · {new Date(r.createdAt).toLocaleDateString()}
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => deleteRoute(r.id)}
+                      className="shrink-0 rounded border border-ap-border bg-ap-bg/60 px-1.5 py-0.5 font-mono text-[8px] text-ap-text-faint hover:border-ap-red/40 hover:text-ap-red"
+                      data-testid={`delete-route-${r.id}`}
+                      aria-label="Delete saved route"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           {plannedRoute ? (
             <div className="rounded border border-ap-border bg-ap-bg/70 p-3">
