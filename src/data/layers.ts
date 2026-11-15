@@ -195,6 +195,26 @@ export const MARS_LAYERS: MarsLayer[] = [
     unavailableReason:
       'No verified public tile endpoint for a TES thermal-inertia mosaic was located during this integration. The layer is declared as unavailable rather than filled with placeholder imagery.',
   },
+  {
+    id: 'isro-mcc',
+    name: 'ISRO Mars Colour Camera (MCC)',
+    datasetId: 'ISRO MOM / Mangalyaan — Mars Colour Camera',
+    kind: 'imagery',
+    status: 'unavailable',
+    measurementType: 'unavailable',
+    description:
+      'True-colour imagery of Mars from the Mars Colour Camera on ISRO\u2019s Mars Orbiter Mission (Mangalyaan). MCC acquired global and regional colour images of the Martian surface during the 2014–2022 mission lifetime.',
+    sourceOrg: 'Indian Space Research Organisation (ISRO) · Mars Orbiter Mission (MOM)',
+    source: 'ISRO / ISSDC · Mars Orbiter Mission',
+    sourceUrl: 'https://www.isro.gov.in/MarsOrbiterMissionSpacecraft.html',
+    resolution: 'Not available as a tile service — MCC images are distributed as downloadable products.',
+    coverage: 'Global and regional colour imaging acquired during the MOM mission (2014–2022).',
+    projection: 'Not applicable — no verified public tile service was found.',
+    limitations:
+      'Not integrated, so ISRO MCC imagery cannot be displayed in this build. MCC data products are available for download from the ISRO Science Data Archive (ISSDC) but no public WMTS/REST tile endpoint was verified.',
+    unavailableReason:
+      'No public tile service could be verified. ISRO\u2019s Mars Colour Camera data is distributed as downloadable image products through the Indian Space Science Data Centre (ISSDC, https://www.issdc.gov.in/), not as a WMTS/REST tile pyramid. No tile endpoint returning HTTP 200 with image bodies and CORS headers was located for MCC or for any other ISRO Mars product (TIS, MSM, MENCA, LAP). The layer is declared as unavailable rather than filled with placeholder imagery.',
+  },
 ];
 
 export const DEFAULT_LAYER_ID: LayerId = 'mola-colorshade';

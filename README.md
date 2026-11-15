@@ -84,6 +84,7 @@ Only services that were actually fetched during integration are listed as
 | **CTX mosaic** | Esri OnMars `CTX` | same as above, 512 px PNG | Integrated (partial coverage) |
 | **MGS MOLA Global Surface Roughness** | — | — | **Not verified — not integrated** |
 | THEMIS infrared / TES thermal inertia | — | — | **Not verified — not integrated** |
+| **ISRO Mars Colour Camera (MCC)** | ISRO Mars Orbiter Mission (Mangalyaan) | MCC colour imagery, 2014–2022 | **Not verified — not integrated** (no public tile service) |
 
 ### MOLA Color Hillshade
 

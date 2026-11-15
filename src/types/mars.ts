@@ -10,7 +10,8 @@ export type LayerId =
   | 'hirise'
   | 'ctx'
   | 'themis-infrared'
-  | 'tes-thermal-inertia';
+  | 'tes-thermal-inertia'
+  | 'isro-mcc';
 
 export type LayerStatus = 'available' | 'unavailable';
 

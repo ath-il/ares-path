@@ -42,4 +42,10 @@ export const MARS_FACTS: MarsFact[] = [
     text: 'Surface exploration includes Viking landers, Pathfinder/Sojourner, Spirit and Opportunity, Phoenix, Curiosity, InSight, Perseverance and the Ingenuity helicopter.',
     source: 'NASA Mars Exploration Program',
   },
+  {
+    id: 'isro-mom',
+    title: 'ISRO Mars Orbiter Mission',
+    text: 'India\u2019s Mars Orbiter Mission (Mangalyaan), launched by ISRO in 2013, made India the first Asian nation to reach Mars orbit and the first country to do so on its first attempt. The spacecraft carried the Mars Colour Camera (MCC), which returned global and regional colour images of the Martian surface during its 2014\u20132022 mission lifetime.',
+    source: 'ISRO · Mars Orbiter Mission',
+  },
 ];
