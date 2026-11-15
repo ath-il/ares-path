@@ -16,17 +16,23 @@ ARES PATH combines publicly available NASA Mars science imagery into an interact
 
 Captures of the running prototype (live at https://ares-path.vercel.app).
 
-| # | File | What it shows |
-|---|------|---------------|
-| 1 | `02-mola-hillshade.png` | Main map with MOLA color hillshade active, HUD, tile counter, and attribution visible |
-| 2 | `04-route-planner.png` | Route planner with custom picked endpoints, calculated great-circle route, distance, duration, and INSUFFICIENT assessment |
-| 3 | `07-mission-brief-view.png` | Mission brief generated on-screen (mission ID, coordinates, distance, duration, data limitations) |
+### 1. Science Targets
 
-![MOLA hillshade map — main map view with HUD and tile counter](docs/screenshots/02-mola-hillshade.png)
+![Science targets panel](docs/screenshots/01-science-targets.png)
 
-![Route planner — custom endpoints, calculated route, distance, duration, and INSUFFICIENT assessment](docs/screenshots/04-route-planner.png)
+Curated points of interest on Mars — Jezero Crater, Gale Crater / Aeolis Mons, Valles Marineris — each with a summary, why it matters, data limitations, and source. Selecting a target frames its real bounding box on the map and opens the context panel.
 
-![Mission brief — generated on-screen with mission ID, coordinates, distance, duration, and data limitations](docs/screenshots/07-mission-brief-view.png)
+### 2. Mission Overview — MOLA Color Hillshade
+
+![Mission overview with MOLA color hillshade](docs/screenshots/02-mission-overview.png)
+
+The main mission console with the MGS MOLA color hillshade basemap active. The HUD shows the active dataset, live tile counts (loaded vs. missing), measurement type badge, and the current zoom/coordinate readout. The map uses a Mars equirectangular CRS — not Web Mercator — so the graticule is correct.
+
+### 3. Distance Route
+
+![Distance route — traverse planner with calculated great-circle route](docs/screenshots/03-distance-route.png)
+
+The traverse planner with custom picked endpoints and a calculated great-circle route. Shows the orange dashed route line, both endpoint pins (orange start, blue destination), the distance and estimated duration, and the transparent INSUFFICIENT assessment (because elevation, slope, and roughness data are not available as sampled values).
 
 ---
 
