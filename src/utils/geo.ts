@@ -71,152 +71,54 @@ export const TRAVERSE_SPEEDS = [
 ] as const;
 
 /**
- * Approximate elevation estimate from the Esri MColorDEM tile at a given
- * lat/lng. Samples the centre pixel of the tile containing the point and
- * maps its colour to an approximate elevation using the standard Mars
- * colourised-DEM ramp (blue = low, green = mid, red/white = high).
- *
- * Returns null if the tile cannot be fetched or sampled. The estimate is
- * rough (±2 km) because the colour scale is not officially documented.
+ * Great-circle waypoints along a traverse: count evenly spaced points
+ * between  and  (inclusive of both endpoints).
  */
-export async function estimateElevationFromDem(
-  lat: number,
-  lng: number,
-): Promise<{ elevationM: number; uncertaintyM: number; rgb: [number, number, number] } | null> {
-  // Use the MOLA color hillshade (NASA Trek) — its color ramp is documented
-  // and tiles have CORS headers, so we can sample pixels from the browser.
-  const urlTemplate =
-    'https://trek.nasa.gov/tiles/Mars/EQ/Mars_MGS_MOLA_ClrShade_merge_global_463m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg';
-
-  const zoom = 5; // level 4 = 326 m/px, good balance of detail and coverage
-  const level = zoom - 1; // zoomOffset = -1
-  const cols = Math.pow(2, zoom); // 2^5 = 32
-  const rows = Math.pow(2, level); // 2^4 = 16
-  const col = Math.floor(((lng + 180) / 360) * cols);
-  const row = Math.floor(((90 - lat) / 180) * rows);
-
-  const url = urlTemplate
-    .replace('{z}', String(level))
-    .replace('{x}', String(col))
-    .replace('{y}', String(row));
-
-  try {
-    const response = await fetch(url, { mode: 'cors' });
-    if (!response.ok) return null;
-    const blob = await response.blob();
-    const bitmap = await createImageBitmap(blob);
-
-    const tileSize = 256;
-    const canvas = document.createElement('canvas');
-    canvas.width = tileSize;
-    canvas.height = tileSize;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return null;
-    ctx.drawImage(bitmap, 0, 0);
-
-    const px = Math.min(
-      tileSize - 1,
-      Math.max(0, Math.floor((((lng + 180) / 360) * cols - col) * tileSize)),
-    );
-    const py = Math.min(
-      tileSize - 1,
-      Math.max(0, Math.floor((((90 - lat) / 180) * rows - row) * tileSize)),
-    );
-
-    const data = ctx.getImageData(px, py, 1, 1).data;
-    const [r, g, b] = [data[0], data[1], data[2]];
-
-    // Approximate Mars DEM colour ramp (MOLA-style):
-    // blue (low) → cyan → green → yellow → orange → red → white (high)
-    // Elevation range: -8 km (Hellas) to +21 km (Olympus Mons)
-    const elevationM = colorToApproximateElevation(r, g, b);
-
-    return { elevationM, uncertaintyM: 2000, rgb: [r, g, b] };
-  } catch {
-    return null;
+export function greatCircleWaypoints(a: LatLng, b: LatLng, count: number): LatLng[] {
+  if (count < 2) return [a, b];
+  const rad = Math.PI / 180;
+  const lat1 = a.lat * rad;
+  const lng1 = a.lng * rad;
+  const lat2 = b.lat * rad;
+  const lng2 = b.lng * rad;
+  const d = 2 * Math.asin(Math.sqrt(
+    Math.sin((lat2 - lat1) / 2) ** 2 +
+    Math.cos(lat1) * Math.cos(lat2) * Math.sin((lng2 - lng1) / 2) ** 2,
+  ));
+  const points: LatLng[] = [];
+  for (let i = 0; i < count; i++) {
+    const f = i / (count - 1);
+    if (d === 0) { points.push({ lat: a.lat, lng: a.lng }); continue; }
+    const A = Math.sin((1 - f) * d) / Math.sin(d);
+    const B = Math.sin(f * d) / Math.sin(d);
+    const x = A * Math.cos(lat1) * Math.cos(lng1) + B * Math.cos(lat2) * Math.cos(lng2);
+    const y = A * Math.cos(lat1) * Math.sin(lng1) + B * Math.cos(lat2) * Math.sin(lng2);
+    const z = A * Math.sin(lat1) + B * Math.sin(lat2);
+    const lat = Math.atan2(z, Math.sqrt(x * x + y * y)) / rad;
+    const lng = Math.atan2(y, x) / rad;
+    points.push({ lat, lng });
   }
-}
-
-function colorToApproximateElevation(r: number, g: number, b: number): number {
-  // Normalise to 0..1
-  const rn = r / 255;
-  const gn = g / 255;
-  const bn = b / 255;
-
-  // Compute hue (0..360) and saturation
-  const max = Math.max(rn, gn, bn);
-  const min = Math.min(rn, gn, bn);
-  const delta = max - min;
-  let hue = 0;
-  if (delta > 0) {
-    if (max === rn) hue = 60 * (((gn - bn) / delta) % 6);
-    else if (max === gn) hue = 60 * ((bn - rn) / delta + 2);
-    else hue = 60 * ((rn - gn) / delta + 4);
-  }
-  if (hue < 0) hue += 360;
-
-  const lightness = (max + min) / 2;
-
-  // Map: low elevation → blue (hue ~240), high → red/white (hue ~0 or lightness ~1)
-  // Mars elevation range: -8000 m to +21000 m (29 km span)
-  // Use a combination of hue and lightness
-
-  // Very light pixels → high elevation (white cap, Olympus Mons)
-  if (lightness > 0.85 && delta < 0.15) return 18000 + (lightness - 0.85) * 20000;
-
-  // Dark pixels → low elevation (Hellas basin, dark blue)
-  if (lightness < 0.15) return -8000 + lightness * 20000;
-
-  // Hue-based mapping for the colour ramp
-  // Blue (200-260) → -8 to -2 km
-  // Cyan (160-200) → -2 to 0 km
-  // Green (80-160) → 0 to +4 km
-  // Yellow (40-80) → +4 to +8 km
-  // Orange (20-40) → +8 to +12 km
-  // Red (0-20 or 340-360) → +12 to +16 km
-
-  let elevationKm: number;
-  if (hue >= 200 && hue < 260) {
-    elevationKm = -8 + ((hue - 200) / 60) * 6; // -8 to -2
-  } else if (hue >= 160 && hue < 200) {
-    elevationKm = -2 + ((hue - 160) / 40) * 2; // -2 to 0
-  } else if (hue >= 80 && hue < 160) {
-    elevationKm = 0 + ((hue - 80) / 80) * 4; // 0 to +4
-  } else if (hue >= 40 && hue < 80) {
-    elevationKm = 4 + ((hue - 40) / 40) * 4; // +4 to +8
-  } else if (hue >= 20 && hue < 40) {
-    elevationKm = 8 + ((hue - 20) / 20) * 4; // +8 to +12
-  } else if (hue >= 0 && hue < 20) {
-    elevationKm = 12 + ((20 - hue) / 20) * 4; // +12 to +16
-  } else if (hue >= 340 && hue <= 360) {
-    elevationKm = 12 + ((360 - hue) / 20) * 4; // +12 to +16
-  } else {
-    // Fallback: use lightness
-    elevationKm = -8 + lightness * 29; // -8 to +21
-  }
-
-  return elevationKm * 1000;
-}
-
-export interface ElevationSample {
-  lat: number;
-  lng: number;
-  elevationM: number;
+  return points;
 }
 
 /**
- * Translates a terrain concern score (0..1) into the public assessment wording.
- * The score is always derived only from factors whose data availability was confirmed.
+ * Estimated metabolic energy for a suited astronaut traversing distanceM
+ * metres at the given speed. Uses an assumed metabolic rate of 300 W for a
+ * suited EVA walk (stated assumption, not a measurement) and converts to
+ * kilojoules.
  */
-export function describeTerrainLevel(level: string): string {
-  switch (level) {
-    case 'lower':
-      return 'Lower relative terrain concern';
-    case 'moderate':
-      return 'Moderate relative terrain concern';
-    case 'higher':
-      return 'Higher relative terrain concern';
-    default:
-      return 'Insufficient data';
-  }
+export function estimatedTraversalEnergyKJ(distanceM: number, speedMps: number): number {
+  if (!Number.isFinite(distanceM) || distanceM <= 0 || !Number.isFinite(speedMps) || speedMps <= 0) return 0;
+  const METABOLIC_POWER_W = 300;
+  const durationS = distanceM / speedMps;
+  return (METABOLIC_POWER_W * durationS) / 1000;
+}
+
+/**
+ * Angular separation in degrees between two points (central angle).
+ */
+export function angularSeparationDeg(a: LatLng, b: LatLng): number {
+  const R = MARS_SURFACE_RADIUS_M;
+  const dist = haversineDistanceM(a, b);
+  return (dist / R) * (180 / Math.PI);
 }

@@ -116,9 +116,6 @@ export interface RouteAssessment {
   bearingDeg: number;
   midpoint: LatLng;
   elevationChangeM: number | null;
-  elevationEstimateStartM: number | null;
-  elevationEstimateEndM: number | null;
-  elevationUncertaintyM: number | null;
   maxSlopePercent: number | null;
   factors: RouteFactor[];
   level: RouteAssessmentLevel;

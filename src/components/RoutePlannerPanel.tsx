@@ -3,7 +3,7 @@ import { SCIENTIFIC_TARGETS } from '../data/scientificTargets';
 import { DEFAULT_ROUTE_POINTS } from '../data/routeDefaults';
 import { useMission } from '../context/MissionContext';
 import { formatCoordinate, formatDistanceKm, formatDurationHuman } from '../utils/format';
-import { estimateElevationFromDem, haversineDistanceM } from '../utils/geo';
+import { angularSeparationDeg, estimatedTraversalEnergyKJ, greatCircleWaypoints, haversineDistanceM } from '../utils/geo';
 import { computeRouteAssessment } from '../services/routing/routeService';
 import type { LatLng, RouteSlot } from '../types/mars';
 
@@ -44,29 +44,21 @@ export default function RoutePlannerPanel() {
     [plannedRoute],
   );
 
-  const [elevStart, setElevStart] = useState<{ m: number; unc: number } | null>(null);
-  const [elevEnd, setElevEnd] = useState<{ m: number; unc: number } | null>(null);
-  const [elevLoading, setElevLoading] = useState(false);
+  const [showWaypoints, setShowWaypoints] = useState(false);
 
-  useEffect(() => {
-    if (!plannedRoute || plannedRoute.points.length < 2) {
-      setElevStart(null);
-      setElevEnd(null);
-      return;
-    }
-    let cancelled = false;
-    setElevLoading(true);
-    (async () => {
-      const [s, e] = await Promise.all([
-        estimateElevationFromDem(plannedRoute.points[0].lat, plannedRoute.points[0].lng),
-        estimateElevationFromDem(plannedRoute.points[1].lat, plannedRoute.points[1].lng),
-      ]);
-      if (cancelled) return;
-      setElevStart(s ? { m: s.elevationM, unc: s.uncertaintyM } : null);
-      setElevEnd(e ? { m: e.elevationM, unc: e.uncertaintyM } : null);
-      setElevLoading(false);
-    })();
-    return () => { cancelled = true; };
+  const waypoints = useMemo(() => {
+    if (!plannedRoute || plannedRoute.points.length < 2) return [];
+    return greatCircleWaypoints(plannedRoute.points[0], plannedRoute.points[plannedRoute.points.length - 1], 6);
+  }, [plannedRoute]);
+
+  const energyKJ = useMemo(() => {
+    if (!plannedRoute) return 0;
+    return estimatedTraversalEnergyKJ(plannedRoute.distanceM, 0.2);
+  }, [plannedRoute]);
+
+  const angularSep = useMemo(() => {
+    if (!plannedRoute || plannedRoute.points.length < 2) return 0;
+    return angularSeparationDeg(plannedRoute.points[0], plannedRoute.points[plannedRoute.points.length - 1]);
   }, [plannedRoute]);
 
   // Publish the assessment to mission state after render (never during render).
@@ -272,35 +264,49 @@ export default function RoutePlannerPanel() {
                   </div>
                 </div>
               ) : null}
-              {(elevStart || elevEnd || elevLoading) ? (
+              {plannedRoute ? (
                 <div className="mt-3 rounded border border-ap-border bg-ap-panel/60 p-2.5">
-                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">ELEVATION ESTIMATE (APPROX.)</div>
-                  <div className="mt-1.5 grid grid-cols-2 gap-2">
-                    <div>
-                      <div className="font-mono text-[8px] text-ap-text-faint">START</div>
-                      <div className="mt-0.5 ap-font-display text-xs text-ap-ice">
-                        {elevLoading ? '…' : elevStart ? `${(elevStart.m / 1000).toFixed(1)} km` : 'n/a'}
-                      </div>
-                      {elevStart ? (
-                        <div className="font-mono text-[7px] text-ap-text-faint">±{elevStart.unc / 1000} km</div>
-                      ) : null}
+                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">TRAVERSE ANALYSIS</div>
+                  <div className="mt-1.5 space-y-1">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="font-mono text-[8px] text-ap-text-faint">Angular separation</span>
+                      <span className="font-mono text-[9px] text-ap-text-dim">{angularSep.toFixed(2)}°</span>
                     </div>
-                    <div>
-                      <div className="font-mono text-[8px] text-ap-text-faint">DESTINATION</div>
-                      <div className="mt-0.5 ap-font-display text-xs text-ap-ice">
-                        {elevLoading ? '…' : elevEnd ? `${(elevEnd.m / 1000).toFixed(1)} km` : 'n/a'}
-                      </div>
-                      {elevEnd ? (
-                        <div className="font-mono text-[7px] text-ap-text-faint">±{elevEnd.unc / 1000} km</div>
-                      ) : null}
+                    <div className="flex items-baseline justify-between gap-2">
+                      <span className="font-mono text-[8px] text-ap-text-faint">Energy (suited, 300 W)</span>
+                      <span className="font-mono text-[9px] text-ap-text-dim">{(energyKJ / 1000).toFixed(1)} MJ ({Math.round(energyKJ / 4.184)} kcal)</span>
                     </div>
                   </div>
                   <div className="mt-1.5 font-mono text-[7px] leading-relaxed text-ap-text-faint">
-                    Sampled from the MOLA color hillshade tile colour at each endpoint. Colour-to-elevation mapping uses the standard MOLA ramp (blue = low, red/white = high) and is approximate (±2 km). Not a measurement.
+                    Energy assumes a 120 kg suited astronaut at 300 W metabolic rate (stated assumption, not a measurement). Mars gravity is 3.71 m/s². No elevation or slope data is available, so this is a flat-traverse lower bound.
                   </div>
                 </div>
               ) : null}
 
+              {plannedRoute && waypoints.length > 0 ? (
+                <div className="mt-3 rounded border border-ap-border bg-ap-panel/60 p-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setShowWaypoints((v) => !v)}
+                    className="flex w-full items-center justify-between font-mono text-[8px] tracking-[0.25em] text-ap-text-faint"
+                  >
+                    <span>GREAT-CIRCLE WAYPOINTS ({waypoints.length})</span>
+                    <span>{showWaypoints ? '−' : '+'}</span>
+                  </button>
+                  {showWaypoints ? (
+                    <div className="mt-1.5 space-y-1">
+                      {waypoints.map((wp, i) => (
+                        <div key={i} className="flex items-baseline justify-between gap-2">
+                          <span className="font-mono text-[8px] text-ap-text-faint">
+                            {i === 0 ? 'START' : i === waypoints.length - 1 ? 'END' : 'WP' + i}
+                          </span>
+                          <span className="font-mono text-[8px] text-ap-ice">{formatCoordinate(wp.lat, wp.lng)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
               {assessment ? (
                 <div className="mt-3">
                   <div className="font-mono text-[9px] tracking-[0.25em] text-ap-text-dim">ASSESSMENT</div>
