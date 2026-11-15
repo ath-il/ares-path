@@ -28,15 +28,11 @@ Captures of the running prototype (live at https://ares-path.vercel.app).
 | 8 | `08-mission-brief-pdf.png` | Downloaded PDF mission brief (A4 document with the same content) |
 | 9 | `09-mobile-drawers.png` | Compact view (~390 px) with the left drawer open over the map and backdrop visible |
 
-![Landing page](docs/screenshots/01-landing.png)
-![MOLA hillshade map](docs/screenshots/02-mola-hillshade.png)
-![Unavailable layer record](docs/screenshots/03-layer-unavailable.png)
-![Route planner](docs/screenshots/04-route-planner.png)
-![Science targets](docs/screenshots/05-science-targets.png)
-![Zoom controls](docs/screenshots/06-zoom-controls.png)
-![Mission brief view](docs/screenshots/07-mission-brief-view.png)
-![Mission brief PDF](docs/screenshots/08-mission-brief-pdf.png)
-![Mobile drawers](docs/screenshots/09-mobile-drawers.png)
+![MOLA hillshade map — main map view with HUD and tile counter](docs/screenshots/02-mola-hillshade.png)
+
+![Route planner — custom endpoints, calculated route, distance, duration, and INSUFFICIENT assessment](docs/screenshots/04-route-planner.png)
+
+![Mission brief — generated on-screen with mission ID, coordinates, distance, duration, and data limitations](docs/screenshots/07-mission-brief-view.png)
 
 ---
 
