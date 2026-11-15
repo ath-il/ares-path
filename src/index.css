@@ -1,0 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --ap-bg: #070b12;
+  --ap-bg-2: #0b1422;
+  --ap-panel: #101b2a;
+  --ap-panel-2: #0d1626;
+  --ap-border: rgba(115, 199, 232, 0.14);
+  --ap-border-strong: rgba(115, 199, 232, 0.3);
+  --ap-orange: #e87542;
+  --ap-gold: #f4b860;
+  --ap-ice: #73c7e8;
+  --ap-green: #80b89a;
+  --ap-text: #c9d6e4;
+  --ap-text-dim: #8fa3b8;
+  --ap-text-faint: #5d7288;
+  --ap-font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --ap-font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --ap-font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--ap-bg);
+  color: var(--ap-text);
+  font-family: var(--ap-font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(115, 199, 232, 0.18);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(115, 199, 232, 0.35);
+}
+
+@layer utilities {
+  .ap-font-display {
+    font-family: var(--ap-font-display);
+  }
+  .ap-font-mono {
+    font-family: var(--ap-font-mono);
+  }
+  .ap-panel {
+    background: linear-gradient(180deg, rgba(16, 27, 42, 0.92), rgba(11, 20, 34, 0.92));
+    border: 1px solid var(--ap-border);
+    backdrop-filter: blur(10px);
+  }
+  .ap-glow-orange {
+    box-shadow: 0 0 24px rgba(232, 117, 66, 0.35);
+  }
+}
+
+/* Route picking: crosshair over the map. Leaflet sets `cursor: grab` on the
+   container itself, so the marker class has to target it directly. */
+.leaflet-container.ap-picking,
+.leaflet-container.ap-picking .leaflet-grab,
+.leaflet-container.ap-picking .leaflet-interactive {
+  cursor: crosshair;
+}
+
+/* Leaflet's own stylesheet paints the container #ddd, which shows as a pale
+   patch wherever no tile is drawn (gaps, loading, world edge). The double
+   class outranks Leaflet's single-class rule regardless of stylesheet order. */
+.leaflet-container.leaflet-container {
+  background: #070b12;
+}
+
+@keyframes ap-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes ap-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes ap-pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@keyframes ap-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+@keyframes ap-spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.ap-animate-fade-in {
+  animation: ap-fade-in 0.6s ease both;
+}
+.ap-animate-slide-up {
+  animation: ap-slide-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ap-animate-pulse-dot {
+  animation: ap-pulse-dot 2.2s ease-in-out infinite;
+}
+.ap-animate-dash {
+  animation: ap-dash 1.4s linear infinite;
+}
+.ap-animate-spin-slow {
+  animation: ap-spin-slow 14s linear infinite;
+}
+
+@keyframes ap-marssurface {
+  0% {
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(-50%, -48%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-50%, -50%, 0) scale(1);
+  }
+}
+.ap-animate-marssurface {
+  animation: ap-marssurface 26s ease-in-out infinite;
+}
+
+/* Print: the mission brief is the only thing that should reach paper. */
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+  }
+  body * {
+    visibility: hidden !important;
+  }
+  .ap-print-target,
+  .ap-print-target * {
+    visibility: visible !important;
+  }
+  .ap-print-target {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    color: #111111 !important;
+  }
+  .ap-print-target .ap-font-display {
+    color: #111111 !important;
+    letter-spacing: 0.08em !important;
+  }
+  .ap-print-target pre {
+    color: #111111 !important;
+    font-size: 9.5pt !important;
+    line-height: 1.45 !important;
+    white-space: pre-wrap !important;
+  }
+  .ap-print-target button {
+    display: none !important;
+  }
+}
