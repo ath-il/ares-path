@@ -316,11 +316,11 @@ export default function MarsMap() {
           full.push(L.latLng(start.lat + (end.lat - start.lat) * t, start.lng + (end.lng - start.lng) * t));
         }
         const polyline = L.polyline([full[0]], {
-          color: '#e87542',
-          weight: 4,
-          opacity: 0.95,
+          color: '#e05a4f',
+          weight: 3,
+          opacity: 0.7,
           lineCap: 'round',
-          dashArray: '1 14',
+          dashArray: '8 6',
         });
         polyline.addTo(map);
         routeLayerRef.current = polyline;

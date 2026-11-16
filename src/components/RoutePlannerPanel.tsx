@@ -36,6 +36,7 @@ export default function RoutePlannerPanel() {
     setPickSlot,
     resetRoutePoint,
     savedRoutes,
+    terrainRoute,
   } = useMission();
 
   const plannedRoute = route;
@@ -220,16 +221,32 @@ export default function RoutePlannerPanel() {
                 <span className="font-mono text-[9px] tracking-[0.25em] text-ap-text-dim">ROUTE</span>
                 <span className="ap-font-display text-right text-xs text-ap-text">{plannedRoute.name}</span>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2">
-                <div className="rounded border border-ap-border bg-ap-panel/60 p-2">
-                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">DISTANCE</div>
-                  <div className="mt-1 ap-font-display text-sm text-ap-ice">
+              {terrainRoute ? (
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <div className="rounded border border-ap-green/40 bg-ap-green/5 p-2">
+                    <div className="font-mono text-[8px] tracking-[0.25em] text-ap-green">CORRECT DISTANCE (TERRAIN)</div>
+                    <div className="mt-1 ap-font-display text-sm text-ap-green">
+                      {formatDistanceKm(terrainRoute.distanceM)}
+                    </div>
+                  </div>
+                  <div className="rounded border border-ap-green/40 bg-ap-green/5 p-2">
+                    <div className="font-mono text-[8px] tracking-[0.25em] text-ap-green">EST. DURATION (TERRAIN)</div>
+                    <div className="mt-1 ap-font-display text-sm text-ap-green">
+                      {formatDurationHuman(terrainRoute.distanceM / 0.2)}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="rounded border border-ap-red/40 bg-ap-red/5 p-2">
+                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-red">DISPLACEMENT (STRAIGHT LINE)</div>
+                  <div className="mt-1 ap-font-display text-sm text-ap-red">
                     {formatDistanceKm(plannedRoute.distanceM)}
                   </div>
                 </div>
-                <div className="rounded border border-ap-border bg-ap-panel/60 p-2">
-                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">EST. DURATION</div>
-                  <div className="mt-1 ap-font-display text-sm text-ap-gold">
+                <div className="rounded border border-ap-red/40 bg-ap-red/5 p-2">
+                  <div className="font-mono text-[8px] tracking-[0.25em] text-ap-red">STRAIGHT-LINE DURATION</div>
+                  <div className="mt-1 ap-font-display text-sm text-ap-red">
                     {formatDurationHuman(plannedRoute.durationS)}
                   </div>
                 </div>
