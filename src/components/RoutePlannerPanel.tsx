@@ -5,8 +5,10 @@ import TerrainRoutePlanner from './TerrainRoutePlanner';
 import { useMission } from '../context/MissionContext';
 import { formatCoordinate, formatDistanceKm, formatDurationHuman } from '../utils/format';
 import { angularSeparationDeg, estimatedTraversalEnergyKJ, greatCircleWaypoints, haversineDistanceM } from '../utils/geo';
+import { buildTerrainGrid } from '../services/terrain/terrainGrid';
+import { astarRoute } from '../services/routing/astar';
 import { computeRouteAssessment } from '../services/routing/routeService';
-import type { LatLng, RouteSlot } from '../types/mars';
+import type { LatLng, RouteMode, RouteSlot } from '../types/mars';
 
 /** Name a point after a published target when the coordinates match exactly. */
 function labelForPoint(point: LatLng): string {
@@ -37,9 +39,15 @@ export default function RoutePlannerPanel() {
     resetRoutePoint,
     savedRoutes,
     terrainRoute,
+    setTerrainRoute,
   } = useMission();
 
   const plannedRoute = route;
+
+  const [terrainMode, setTerrainMode] = useState<RouteMode>('rover');
+  const [terrainMaxSlope, setTerrainMaxSlope] = useState(25);
+  const [terrainLoading, setTerrainLoading] = useState(false);
+  const [terrainError, setTerrainError] = useState<string | null>(null);
 
   const assessment = useMemo(
     () => (plannedRoute && plannedRoute.points.length >= 2 ? computeRouteAssessment(plannedRoute.points) : null),
@@ -74,7 +82,7 @@ export default function RoutePlannerPanel() {
   const endLabel = labelForPoint(routeEnd);
   const previewDistanceM = haversineDistanceM(routeStart, routeEnd);
 
-  const handleSetRoute = () => {
+  const handleSetRoute = async () => {
     const points = [routeStart, routeEnd];
     const distanceM = haversineDistanceM(points[0], points[1]);
     setRoute({
@@ -85,6 +93,41 @@ export default function RoutePlannerPanel() {
       durationS: distanceM / 0.2,
       createdAt: new Date().toISOString(),
     });
+
+    // Also calculate terrain route
+    setTerrainLoading(true);
+    setTerrainError(null);
+    try {
+      const distKm = distanceM / 1000;
+      let gridCells = 20;
+      let cellSizeM = 500;
+      if (distKm > 50) {
+        gridCells = 25;
+        cellSizeM = Math.ceil((distKm * 1000) / (gridCells - 1));
+      }
+      if (distKm > 100) {
+        gridCells = 30;
+        cellSizeM = Math.ceil((distKm * 1000) / (gridCells - 1));
+      }
+      const grid = await buildTerrainGrid(
+        (routeStart.lat + routeEnd.lat) / 2,
+        (routeStart.lng + routeEnd.lng) / 2,
+        gridCells,
+        cellSizeM,
+      );
+      const result = astarRoute(grid, routeStart.lat, routeStart.lng, routeEnd.lat, routeEnd.lng, terrainMode, terrainMaxSlope);
+      if (!result) {
+        setTerrainError('No terrain path found. Terrain may be too steep or region too large.');
+        setTerrainRoute(null);
+      } else {
+        setTerrainRoute(result);
+      }
+    } catch (e) {
+      setTerrainError(`Terrain analysis failed: ${e instanceof Error ? e.message : 'unknown error'}`);
+      setTerrainRoute(null);
+    } finally {
+      setTerrainLoading(false);
+    }
   };
 
   const slotCard = (slot: RouteSlot, label: string, point: LatLng) => {
@@ -166,10 +209,11 @@ export default function RoutePlannerPanel() {
           <button
             type="button"
             onClick={handleSetRoute}
-            className="w-full rounded border border-ap-orange/60 bg-ap-orange/10 px-3 py-2 font-mono text-[10px] tracking-[0.25em] text-ap-orange"
+            disabled={terrainLoading}
+            className="w-full rounded border border-ap-orange/60 bg-ap-orange/10 px-3 py-2 font-mono text-[10px] tracking-[0.25em] text-ap-orange disabled:opacity-50"
             data-testid="calculate-route"
           >
-            CALCULATE ROUTE
+            {terrainLoading ? 'CALCULATING...' : 'CALCULATE ROUTE'}
           </button>
 
           {savedRoutes.length > 0 ? (
@@ -213,7 +257,14 @@ export default function RoutePlannerPanel() {
             </div>
           ) : null}
 
-          <TerrainRoutePlanner />
+          <TerrainRoutePlanner
+            mode={terrainMode}
+            onModeChange={setTerrainMode}
+            maxSlope={terrainMaxSlope}
+            onMaxSlopeChange={setTerrainMaxSlope}
+            loading={terrainLoading}
+            error={terrainError}
+          />
 
           {plannedRoute ? (
             <div className="rounded border border-ap-border bg-ap-bg/70 p-3">
