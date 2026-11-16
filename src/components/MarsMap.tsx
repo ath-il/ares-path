@@ -282,6 +282,13 @@ export default function MarsMap() {
     const map = mapRef.current;
     if (!map) return;
 
+    // Routes are only visible in the route section.
+    if (section !== 'route') {
+      if (routeLayerRef.current) { try { map.removeLayer(routeLayerRef.current); } catch { /* ignore */ } routeLayerRef.current = null; }
+      if (terrainRouteLayerRef.current) { try { map.removeLayer(terrainRouteLayerRef.current); } catch { /* ignore */ } terrainRouteLayerRef.current = null; }
+      return;
+    }
+
     const clearMarkers = () => {
       if (startMarkerRef.current) {
         map.removeLayer(startMarkerRef.current);
@@ -318,9 +325,11 @@ export default function MarsMap() {
         const polyline = L.polyline([full[0]], {
           color: '#e05a4f',
           weight: 3,
-          opacity: 0.7,
+          opacity: 0.6,
           lineCap: 'round',
-          dashArray: '8 6',
+          lineJoin: 'round',
+          dashArray: '12 8',
+          className: 'ap-route-displacement',
         });
         polyline.addTo(map);
         routeLayerRef.current = polyline;
@@ -369,7 +378,7 @@ export default function MarsMap() {
     drawRoute();
     updateSelectedMarker();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [route, selected]);
+  }, [route, selected, section]);
 
   /**
    * Endpoint pins for the traverse. Shown in the route-planner section so the
@@ -390,22 +399,22 @@ export default function MarsMap() {
     if (section !== 'route') return;
 
     routeStartMarkerRef.current = L.circleMarker(L.latLng(routeStart.lat, routeStart.lng), {
-      radius: 8,
-      color: '#e87542',
-      weight: 3,
+      radius: 10,
+      color: '#ffffff',
+      weight: 2,
       fillColor: '#e87542',
-      fillOpacity: 0.85,
+      fillOpacity: 1,
     })
-      .bindTooltip('EVA START', { direction: 'top', offset: L.point(0, -6) })
+      .bindTooltip('EVA START', { direction: 'top', offset: L.point(0, -8) })
       .addTo(map);
     routeStartMarkerRef.current.bringToFront();
 
     routeEndMarkerRef.current = L.circleMarker(L.latLng(routeEnd.lat, routeEnd.lng), {
-      radius: 8,
-      color: '#73c7e8',
-      weight: 3,
+      radius: 10,
+      color: '#ffffff',
+      weight: 2,
       fillColor: '#73c7e8',
-      fillOpacity: 0.85,
+      fillOpacity: 1,
     })
       .bindTooltip('EVA DESTINATION', { direction: 'top', offset: L.point(0, -6) })
       .addTo(map);
@@ -425,8 +434,9 @@ export default function MarsMap() {
       terrainRouteLayerRef.current = null;
     }
 
+    if (section !== 'route') return;
+
     if (terrainRoute && terrainRoute.path.length >= 2) {
-      // Use exact start/end coordinates so the line connects to the pins
       const coords = [
         L.latLng(routeStart.lat, routeStart.lng),
         ...terrainRoute.path.slice(1, -1).map((p) => L.latLng(p.lat, p.lng)),
@@ -436,16 +446,18 @@ export default function MarsMap() {
         coords,
         {
           color: '#80b89a',
-          weight: 3,
-          opacity: 0.9,
+          weight: 4,
+          opacity: 0.95,
           lineCap: 'round',
-          dashArray: '6 8',
+          lineJoin: 'round',
+          dashArray: '10 6',
+          className: 'ap-route-terrain',
         },
       );
       polyline.addTo(map);
       terrainRouteLayerRef.current = polyline;
     }
-  }, [terrainRoute]);
+  }, [terrainRoute, section, routeStart, routeEnd]);
 
   const focusMap = (map: L.Map, center: L.LatLng, zoom: number) => {
     const start = map.getCenter();

@@ -83,6 +83,14 @@ body {
   background: #070b12;
 }
 
+/* Route polylines: subtle glow for a map-like feel. */
+.ap-route-displacement {
+  filter: drop-shadow(0 0 3px rgba(224, 90, 79, 0.5));
+}
+.ap-route-terrain {
+  filter: drop-shadow(0 0 4px rgba(128, 184, 154, 0.6));
+}
+
 @keyframes ap-fade-in {
   from {
     opacity: 0;
