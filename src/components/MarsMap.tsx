@@ -29,6 +29,7 @@ export default function MarsMap() {
   const selectedMarkerRef = useRef<L.CircleMarker | null>(null);
   const routeStartMarkerRef = useRef<L.CircleMarker | null>(null);
   const routeEndMarkerRef = useRef<L.CircleMarker | null>(null);
+  const terrainRouteLayerRef = useRef<L.Polyline | null>(null);
   const pickSlotRef = useRef<RouteSlot | null>(null);
   const routeRef = useRef<{ points: LatLng[]; id?: string } | null>(null);
   const selectedRef = useRef<{ lat: number; lng: number; name: string; kind: string; id?: string } | null>(null);
@@ -50,6 +51,7 @@ export default function MarsMap() {
   const pickSlot = useMission().pickSlot;
   const setPickSlot = useMission().setPickSlot;
   const setRoutePoint = useMission().setRoutePoint;
+  const terrainRoute = useMission().terrainRoute;
 
   const activeLayer = MARS_LAYERS.find((layer) => layer.id === activeLayerId) ?? MARS_LAYERS[0];
   const status: LayerLoadStatus =
@@ -409,6 +411,35 @@ export default function MarsMap() {
       .addTo(map);
     routeEndMarkerRef.current.bringToFront();
   }, [routeStart, routeEnd, section]);
+
+  /**
+   * Terrain-aware route (A* pathfinding). Rendered as a green dashed polyline
+   * so it is visually distinct from the great-circle route (orange).
+   */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    if (terrainRouteLayerRef.current) {
+      try { map.removeLayer(terrainRouteLayerRef.current); } catch { /* ignore */ }
+      terrainRouteLayerRef.current = null;
+    }
+
+    if (terrainRoute && terrainRoute.path.length >= 2) {
+      const polyline = L.polyline(
+        terrainRoute.path.map((p) => L.latLng(p.lat, p.lng)),
+        {
+          color: '#80b89a',
+          weight: 3,
+          opacity: 0.9,
+          lineCap: 'round',
+          dashArray: '6 8',
+        },
+      );
+      polyline.addTo(map);
+      terrainRouteLayerRef.current = polyline;
+    }
+  }, [terrainRoute]);
 
   const focusMap = (map: L.Map, center: L.LatLng, zoom: number) => {
     const start = map.getCenter();

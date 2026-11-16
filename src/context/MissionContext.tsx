@@ -8,6 +8,7 @@ import type {
   MissionSection,
   PlannedRoute,
   RouteAssessment,
+  RouteResult,
   RouteSlot,
   ScienceTarget,
 } from '../types/mars';
@@ -38,6 +39,9 @@ interface MissionContextValue {
   routeStart: LatLng;
   routeEnd: LatLng;
   setRoutePoint: (slot: RouteSlot, point: LatLng) => void;
+  /** Terrain-aware route result (A* pathfinding). */
+  terrainRoute: RouteResult | null;
+  setTerrainRoute: (route: RouteResult | null) => void;
   resetRoutePoint: (slot: RouteSlot) => void;
   /** Non-null while the map is waiting for a click that sets that endpoint. */
   pickSlot: RouteSlot | null;
@@ -71,6 +75,7 @@ export function MissionProvider({ children }: { children: ReactNode }) {
   const [reportOpen, setReportOpen] = useState(false);
   const [regionId, setRegionId] = useState('jezero');
   const [routePoints, setRoutePoints] = useState<Record<RouteSlot, LatLng>>(DEFAULT_ROUTE_POINTS);
+  const [terrainRoute, setTerrainRoute] = useState<RouteResult | null>(null);
   const [pickSlot, setPickSlot] = useState<RouteSlot | null>(null);
 
   const setRoutePoint = useCallback((slot: RouteSlot, point: LatLng) => {
@@ -179,6 +184,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       resetRoutePoint,
       pickSlot,
       setPickSlot,
+      terrainRoute,
+      setTerrainRoute,
     }),
     [
       view,
@@ -208,6 +215,8 @@ export function MissionProvider({ children }: { children: ReactNode }) {
       setRoutePoint,
       resetRoutePoint,
       pickSlot,
+      terrainRoute,
+      setTerrainRoute,
     ],
   );
 

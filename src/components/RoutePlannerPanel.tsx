@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { SCIENTIFIC_TARGETS } from '../data/scientificTargets';
 import { DEFAULT_ROUTE_POINTS } from '../data/routeDefaults';
+import TerrainRoutePlanner from './TerrainRoutePlanner';
 import { useMission } from '../context/MissionContext';
 import { formatCoordinate, formatDistanceKm, formatDurationHuman } from '../utils/format';
 import { angularSeparationDeg, estimatedTraversalEnergyKJ, greatCircleWaypoints, haversineDistanceM } from '../utils/geo';
@@ -211,6 +212,8 @@ export default function RoutePlannerPanel() {
             </div>
           ) : null}
 
+          <TerrainRoutePlanner />
+
           {plannedRoute ? (
             <div className="rounded border border-ap-border bg-ap-bg/70 p-3">
               <div className="flex items-baseline justify-between gap-3">
@@ -264,7 +267,7 @@ export default function RoutePlannerPanel() {
                   </div>
                 </div>
               ) : null}
-              {plannedRoute ? (
+          {plannedRoute ? (
                 <div className="mt-3 rounded border border-ap-border bg-ap-panel/60 p-2.5">
                   <div className="font-mono text-[8px] tracking-[0.25em] text-ap-text-faint">TRAVERSE ANALYSIS</div>
                   <div className="mt-1.5 space-y-1">

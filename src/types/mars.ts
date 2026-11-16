@@ -137,6 +137,46 @@ export type AppView = 'landing' | 'mission';
 /** Which end of the traverse a map pick will set. */
 export type RouteSlot = 'start' | 'end';
 
+/** Navigation mode for route planning. */
+export type RouteMode = 'rover' | 'astronaut';
+
+/** A grid cell in the terrain model. */
+export interface TerrainCell {
+  lat: number;
+  lng: number;
+  elevationM: number | null; // approximate, from MOLA color ramp
+  slopeDeg: number | null;
+  cost: number; // traversal cost (1 = flat, higher = harder)
+  blocked: boolean;
+}
+
+/** A terrain grid for a region. */
+export interface TerrainGrid {
+  minLat: number;
+  maxLat: number;
+  minLng: number;
+  maxLng: number;
+  rows: number;
+  cols: number;
+  cellSizeM: number; // approximate cell size in meters
+  cells: TerrainCell[][];
+  dataSource: string;
+  dataSourceUrl: string;
+}
+
+/** Result of an A* route calculation. */
+export interface RouteResult {
+  path: LatLng[];
+  distanceM: number;
+  elevationGainM: number;
+  maxSlopeDeg: number;
+  totalCost: number;
+  mode: RouteMode;
+  blockedCells: number;
+  unknownCells: number;
+  waypoints: LatLng[];
+}
+
 export interface Selection {
   kind: 'target' | 'point';
   id?: string;
