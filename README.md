@@ -63,11 +63,12 @@ No API keys are required. Every tile service below is public and CORS-enabled
 | Failure handling | If no tile can be fetched, an explicit "basemap unavailable" panel replaces the map — never invented terrain |
 | Explore regions | Jezero Crater, Gale Crater / Aeolis Mons, Valles Marineris — each frames its real bounding box |
 | Science targets | Curated points of interest with summary, why it matters, limitations and source |
-| Route planner | Pick both traverse endpoints directly on the map (or reset to the Jezero/Aeolis presets), then compute great-circle distance, initial bearing, midpoint, multi-speed durations (suited walk, rover, drone), estimated metabolic energy, angular separation, great-circle waypoints, and a transparent assessment |
+| Route planner | Pick both traverse endpoints directly on the map (or reset to the Jezero/Aeolis presets), then compute a terrain-aware route via A* pathfinding on a MOLA elevation grid. Shows both the correct terrain distance (green) and straight-line displacement (red) with durations, bearing, midpoint, multi-speed times, estimated energy, waypoints, and a transparent assessment |
 | Mission brief | Generated report with a real PDF download and a printable document view |
 | Education | "Understand your planet" Mars facts with sources |
 | Telemetry | Coordinate readout in decimal degrees and DMS, active dataset, system state |
 | Responsive | Both side panels collapse to a toggle at any width; below 1024 px they become drawers with a backdrop, and the map is inset by the docked panels' widths so zoom and target focus land in the visible part of the map |
+| Terrain routing | A* pathfinding on a MOLA elevation grid (approximate, ±2 km). Rover and astronaut modes with configurable max slope. Shows correct terrain distance (green) vs. straight-line displacement (red). Includes elevation gain, max slope, terrain cost, blocked/unknown cells, and great-circle waypoints |
 
 ---
 
@@ -202,6 +203,8 @@ src/
 - Custom endpoints come from raw map clicks; there is no snapping to a landing ellipse or safe terrain, and no coordinate entry field yet.
 - No elevation sampling, so no slope/roughness scoring (by design).
 - MOLA hillshade stops at level 7; zooming further only upscales ~326 m/px tiles.
+- Terrain routing uses approximate elevation (±2 km) derived from MOLA color hillshade pixel colors, not numerical DEM values. The hillshade combines elevation color with terrain shading, making single-pixel sampling unreliable.
+- A* pathfinding runs on the client; large regions (100+ km) may be slow. Grid resolution is coarse (~500 m to 5 km per cell).
 - HiRISE and CTX cover only part of the planet; missing tiles are genuine gaps.
 - The Esri services publish no pixel size or accuracy statement, so their true ground resolution is undocumented here.
 - No roughness, THEMIS or TES raster service could be verified — those layers stay unavailable rather than simulated.
