@@ -426,8 +426,14 @@ export default function MarsMap() {
     }
 
     if (terrainRoute && terrainRoute.path.length >= 2) {
+      // Use exact start/end coordinates so the line connects to the pins
+      const coords = [
+        L.latLng(routeStart.lat, routeStart.lng),
+        ...terrainRoute.path.slice(1, -1).map((p) => L.latLng(p.lat, p.lng)),
+        L.latLng(routeEnd.lat, routeEnd.lng),
+      ];
       const polyline = L.polyline(
-        terrainRoute.path.map((p) => L.latLng(p.lat, p.lng)),
+        coords,
         {
           color: '#80b89a',
           weight: 3,
